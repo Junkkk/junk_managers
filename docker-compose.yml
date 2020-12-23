@@ -1,12 +1,9 @@
 version: '3'
 
+volumes:
+  pgdata:
+
 services:
-
-  app:
-    build: .
-    ports:
-    - "8000:8000"
-
   db:
     image: postgres
     container_name: pg
@@ -17,3 +14,19 @@ services:
       POSTGRES_DB: managers
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    command: sh -c "alembic upgrade head && python app/main.py"
+    container_name: app
+    environment:
+      PG_HOST: db
+      PG_USER: postgres
+      PG_DB: managers
+      PG_PASS: postgres
+    ports:
+    - "8000:8000"
+    depends_on:
+      - db

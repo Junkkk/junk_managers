@@ -1,26 +1,26 @@
-import os
 import uvicorn
+import sys
+sys.path = ['', '..'] + sys.path[1:]
 
-from typing import Optional
-from fastapi import FastAPI
-
-
-print('Main start')
-print(os.getenv('DB_PASS'))
+from app.api.routers import router
+from fastapi import FastAPI, Request, Response
+from app.db.session import SessionLocal
 
 
 app = FastAPI()
+app.include_router(router)
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    response = Response("Internal server error", status_code=500)
+    try:
+        request.state.db = SessionLocal()
+        response = await call_next(request)
+    finally:
+        request.state.db.close()
+    return response
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, port=8000)
+    uvicorn.run(app, host='0.0.0.0', port=8000)
