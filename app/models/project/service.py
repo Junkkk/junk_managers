@@ -8,3 +8,7 @@ async def create_project(db: Session, item: schema.Project):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+async def get_project(db: Session, project_id: int):
+    return db.query(db_model.Project).filter(db_model.Project.id == project_id).first()
