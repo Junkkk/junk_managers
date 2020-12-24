@@ -5,7 +5,6 @@ from app.db.utils import get_db
 from app.api.auth import get_current_user
 from app.models.token.schemas import Token
 from app.models.user.db_model import User as DBUser
-from app.models.user.schema import User
 from app.models.user.service import authenticate
 from app.api.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
